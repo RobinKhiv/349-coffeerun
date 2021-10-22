@@ -1,45 +1,49 @@
 (function (window) {
     'use strict';
+
     var App = window.App || {};
 
     class Truck {
         constructor(truckId, db) {
-            console.log('running the Truck constructor.');
+            'use strict';
             this.truckId = truckId;
             this.db = db;
         }
-        
         createOrder(order) {
+            'use strict';
             console.log('Adding order for ' + order.emailAddress);
-            this.db.add(order.emailAddress, order);
+            return this.db.add(order.emailAddress, order);
         }
-        deliverOrder(customerId) {
+        deliverOrder(customerId) { 
+            'use strict';
             console.log('Delivering order for ' + customerId);
-            this.db.remove(customerId);
+            return this.db.remove(customerId);
         }
-        printOrders() {
-            var customerIdArray = Object.keys(this.db.getAll());
-            customerIdArray.forEach(function(id) { 
-                console.log(this.db.get(id));
+        printOrders(printFn) {
+            'use strict';
+            return this.db.getAll() 
+                .then(function(orders) {
+                    var customerIdArray = Object.keys(orders);
+                    console.log('Truck #' + this.truckId + ' has pending orders: ');
+                    customerIdArray.forEach(function(id) {
+                        console.log(orders[id]);   
+                        if (printFn) { printFn(orders[id]); }     
+                }.bind(this));
             }.bind(this));
         }
+        static runTests(truck) {
+            'use strict';
+            console.log('==================================== running tests for truck...');
 
-        static runTests(truck) { 
-            truck.createOrder({ emailAddress: 'dr@no.com', coffee: 'decaf'});
             truck.createOrder({ emailAddress: 'me@goldfinger.com', coffee: 'double mocha'});
+            truck.createOrder({ emailAddress: 'dr@no.com', coffee: 'decaf'});
             truck.createOrder({ emailAddress: 'm@bond.com', coffee: 'earl grey'});
             truck.printOrders();
-            
-            truck.deliverOrder('m@bond.com');
             truck.deliverOrder('dr@no.com');
-            truck.printOrders();
-
-            truck.deliverOrder('me@bond.com');
+            truck.deliverOrder('m@bond.com');
             truck.printOrders();
         }
     }
- 
     App.Truck = Truck;
     window.App = App;
-
 })(window);
